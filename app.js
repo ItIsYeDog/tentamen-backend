@@ -31,9 +31,9 @@ if (!fs.existsSync(currentLogDirectory)) {
     }
 }
 
-
 // Logger ruter som blir kalt og tidspunktet i formatet dd.mm.yyyy - /url
 app.use((req, res, next) => {
+    console.log('--- DEBUG: Log middleware CALLED ---');
     const now = new Date();
     const day = String(now.getDate()).padStart(2, '0');
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -41,29 +41,22 @@ app.use((req, res, next) => {
     const timestamp = `${day}.${month}.${year}`;
     const logMessage = `${timestamp} - ${req.method} ${req.originalUrl}\n`;
 
+    console.log(`DEBUG: Attempting to log to: ${logFilePath}`);
+    console.log(`DEBUG: Log message: ${logMessage.trim()}`);
+
     fs.appendFile(logFilePath, logMessage, (err) => {
         if (err) {
-            console.error('Failed to write to log file:', err);
+            console.error('DEBUG: Failed to write to log file:', err);
+            console.error('DEBUG: Error object:', JSON.stringify(err, null, 2));
+        } else {
+            console.log(`DEBUG: Successfully wrote to log file: ${logFilePath}`);
         }
     });
     next();
 });
 
-mongoose.connect(mongoUrl)
-    .then(() => {
-        console.log('Connected to MongoDB');
-        app.listen(port, () => {
-            console.log(`Server is running on port ${port}`);
-        })
-    })
-    .catch((err) => {
-        console.error('Error connecting to MongoDB:', err);
-        process.exit(1);
-    });
-
 app.use('/status', statusRoutes);
 app.use('/items', itemRoutes);
-
 
 // Enkel feilhåndtering
 app.use((err, req, res, next) => {
@@ -71,3 +64,14 @@ app.use((err, req, res, next) => {
     res.status(500).send('Noe gikk galt!');
 });
 
+mongoose.connect(mongoUrl)
+    .then(() => {
+        console.log('Connected to MongoDB');
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
+        });
+    })
+    .catch((err) => {
+        console.error('Error connecting to MongoDB:', err);
+        process.exit(1);
+    });
