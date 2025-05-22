@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const statusRoutes = require('./routes/status');
+const itemRoutes = require('./routes/items');
 
 dotenv.config();
 
@@ -24,11 +25,12 @@ mongoose.connect(mongoUrl)
     });
 
 app.use('/status', statusRoutes);
+app.use('/items', itemRoutes);
 
 
 // Enkel feilhåndtering
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Noe gikk galt!');
-}) 
+});
 
