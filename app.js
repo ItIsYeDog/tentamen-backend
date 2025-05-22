@@ -1,6 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const statusRoutes = require('./routes/status');
+
 dotenv.config();
 
 const app = express();
@@ -20,4 +22,13 @@ mongoose.connect(mongoUrl)
         console.error('Error connecting to MongoDB:', err);
         process.exit(1);
     });
+
+app.use('/status', statusRoutes);
+
+
+// Enkel feilhåndtering
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Noe gikk galt!');
+}) 
 
